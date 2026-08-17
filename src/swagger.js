@@ -30,6 +30,7 @@ const openApiSpec = {
     { url: '/api/v1', description: 'API base path' },
   ],
   tags: [
+    { name: 'Portfolio', description: 'Book-of-business aggregate overview' },
     { name: 'Clients', description: 'Read-only client projection + summaries' },
     { name: 'Goals', description: 'Financial goals: CRUD, projection, Monte Carlo' },
     { name: 'Plans', description: 'Plans grouping goals: CRUD, summary, Monte Carlo' },
@@ -67,6 +68,32 @@ const openApiSpec = {
                   message: 'Seed data restored',
                   counts: { clients: 50, goals: 132, plans: 40, items: 220 },
                   timestamp: '2026-01-01T00:00:00.000Z',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/portfolio/overview': {
+      get: {
+        tags: ['Portfolio'],
+        summary: 'Book-of-business overview across all clients',
+        responses: {
+          200: {
+            description: 'Aggregated portfolio overview',
+            content: {
+              'application/json': {
+                example: {
+                  clientCount: 50, goalCount: 132, planCount: 40,
+                  totalAssets: 42500000, totalLiabilities: 9800000, netWorth: 32700000,
+                  goalStatusMix: { ON_TRACK: 46, AT_RISK: 43, OFF_TRACK: 43 },
+                  goalStatusPct: { ON_TRACK: 0.348, AT_RISK: 0.326, OFF_TRACK: 0.326 },
+                  planStatus: { DRAFT: 6, ACTIVE: 30, ARCHIVED: 4 },
+                  clientsNeedingAttentionCount: 44,
+                  clientsNeedingAttention: [
+                    { clientId: 'CUST-003', name: 'Elena Rodriguez', goalCount: 3, onTrack: 1, atRisk: 1, offTrack: 1, onTrackPercentage: 0.33, totalMonthlyShortfall: 1240 },
+                  ],
                 },
               },
             },

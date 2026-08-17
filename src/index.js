@@ -21,6 +21,7 @@ import clientsRouter from './routes/clients.js';
 import goalsRouter from './routes/goals.js';
 import plansRouter from './routes/plans.js';
 import assetsRouter from './routes/assets.js';
+import portfolioRouter from './routes/portfolio.js';
 import demoRouter from './routes/demo.js';
 
 const PORT = process.env.PORT || 3003;
@@ -68,6 +69,7 @@ export function createApp() {
   api.use('/goals', goalsRouter);
   api.use('/plans', plansRouter);
   api.use('/assets', assetsRouter);
+  api.use('/portfolio', portfolioRouter);
   app.use('/api/v1', api);
 
   // 404 for unmatched API routes.

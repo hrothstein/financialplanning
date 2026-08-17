@@ -27,6 +27,14 @@ const bool = (description) => ({ type: 'boolean', ...(description ? { descriptio
 const GOAL_TYPES = ['RETIREMENT', 'EDUCATION', 'HOME_PURCHASE', 'MAJOR_PURCHASE', 'EMERGENCY_FUND', 'WEALTH_ACCUMULATION', 'LEGACY'];
 
 export const tools = [
+  // --- Portfolio (book-wide) ---
+  {
+    name: 'planning_get_portfolio_overview',
+    description: 'Book-of-business overview across all clients: total net worth, assets and liabilities, the goal-status mix (on track / at risk / off track), plan status counts, and the clients most in need of attention. Takes no arguments.',
+    inputSchema: S({}),
+    handler: () => ops.getPortfolioOverview(),
+  },
+
   // --- Clients ---
   {
     name: 'planning_list_clients',

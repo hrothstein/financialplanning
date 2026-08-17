@@ -25,6 +25,8 @@ async function request(path, options = {}) {
 }
 
 export const api = {
+  getPortfolioOverview: () => request('/portfolio/overview'),
+
   listClients: (params = '') => request(`/clients${params}`),
   getClient: (id) => request(`/clients/${id}`),
   getClientSummary: (id) => request(`/clients/${id}/summary`),

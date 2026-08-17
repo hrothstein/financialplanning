@@ -40,7 +40,18 @@ a:hover { text-decoration: underline; }
 }
 .topbar .brand { font-weight: 700; font-size: 17px; letter-spacing: 0.2px; }
 .topbar .brand span { color: var(--accent); }
+.topbar .tabs { display: flex; gap: 4px; margin-left: 20px; }
+.topbar .tabs a {
+  color: var(--muted); font-size: 14px; font-weight: 600;
+  padding: 6px 12px; border-radius: 8px; text-decoration: none;
+}
+.topbar .tabs a:hover { color: var(--text); background: var(--panel-2); }
+.topbar .tabs a.active { color: #fff; background: var(--accent); }
 .topbar .spacer { flex: 1; }
+@media (max-width: 720px) {
+  .topbar { flex-wrap: wrap; }
+  .topbar .links { display: none; }
+}
 .topbar .links a { color: var(--muted); margin-left: 18px; font-size: 14px; }
 .topbar .links a:hover { color: var(--text); }
 .content { padding: 24px; max-width: 1180px; width: 100%; margin: 0 auto; }

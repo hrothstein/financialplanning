@@ -15,7 +15,7 @@ export default function ClientsPage() {
   return (
     <div>
       <h1>Clients</h1>
-      <p className="subtle">Goals-based financial planning across the book of business. Select a client to open their plan dashboard.</p>
+      <p className="subtle">Select a client to open their dashboard — goals, net worth, and plans.</p>
 
       <div className="toolbar mt-16">
         <label className="subtle">Risk tolerance</label>

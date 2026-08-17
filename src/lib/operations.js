@@ -14,6 +14,7 @@ import { projectGoal } from '../services/projectionEngine.js';
 import { runMonteCarlo } from '../services/monteCarloEngine.js';
 import { computeNetWorth } from '../services/netWorthService.js';
 import { summarizePlan } from '../services/planSummaryService.js';
+import { buildPortfolioOverview } from '../services/portfolioService.js';
 import {
   notFound,
   badRequest,
@@ -97,6 +98,19 @@ export function getClientSummary(clientId) {
     totalAssets: netWorth.totalAssets,
     totalLiabilities: netWorth.totalLiabilities,
   };
+}
+
+// --- portfolio (book-wide) -----------------------------------------------
+
+/** Aggregate the whole book of business into an advisor overview. */
+export function getPortfolioOverview() {
+  return buildPortfolioOverview({
+    clients: [...store.clients.values()],
+    goals: [...store.goals.values()],
+    items: [...store.items.values()],
+    plans: [...store.plans.values()],
+    project: (goal, client) => projectGoal(goal, client),
+  });
 }
 
 // --- goals ---------------------------------------------------------------
