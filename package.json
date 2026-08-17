@@ -1,0 +1,32 @@
+{
+  "name": "financial-planning-system",
+  "version": "1.0.0",
+  "description": "Financial Planning System (FPS) — goals-based financial planning demo backend with REST API + MCP server. Part of a Salesforce Financial Services Cloud + MuleSoft demo estate.",
+  "type": "module",
+  "main": "src/index.js",
+  "engines": {
+    "node": ">=18.x"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "test": "node --test"
+  },
+  "keywords": [
+    "financial-planning",
+    "wealth-management",
+    "salesforce",
+    "fsc",
+    "mulesoft",
+    "mcp",
+    "demo"
+  ],
+  "author": "Howie Rothstein",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "swagger-ui-express": "^5.0.1"
+  }
+}

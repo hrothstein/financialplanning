@@ -1,0 +1,26 @@
+# Build spec — contains private Heroku account/team details; never commit
+FinancialPlanning_PRD.md
+
+# Session handoff / local deploy notes (private)
+HANDOFF.local.md
+DEPLOY.local.md
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build output
+dist/
+build/
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
