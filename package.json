@@ -5,13 +5,13 @@
   "type": "module",
   "main": "src/index.js",
   "engines": {
-    "node": ">=18.x"
+    "node": "18.x || 20.x || 22.x"
   },
   "scripts": {
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
     "test": "node --test",
-    "build:frontend": "npm --prefix frontend install && npm --prefix frontend run build",
+    "build:frontend": "npm --prefix frontend install --include=dev && npm --prefix frontend run build",
     "heroku-postbuild": "npm run build:frontend"
   },
   "keywords": [
