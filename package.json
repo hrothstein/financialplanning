@@ -10,7 +10,9 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
-    "test": "node --test"
+    "test": "node --test",
+    "build:frontend": "npm --prefix frontend install && npm --prefix frontend run build",
+    "heroku-postbuild": "npm run build:frontend"
   },
   "keywords": [
     "financial-planning",

@@ -8,6 +8,9 @@
 
 import express from 'express';
 import cors from 'cors';
+import { existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
 
 import { reset } from './data/store.js';
 import { toErrorBody, ApiError } from './lib/errors.js';
@@ -22,6 +25,12 @@ import demoRouter from './routes/demo.js';
 
 const PORT = process.env.PORT || 3003;
 
+// Path to the built frontend (frontend/dist). Present only after a Vite build
+// (locally via `npm run build`, on Heroku via the postinstall hook). When it's
+// missing the app still runs headless with just the API/docs/MCP.
+const DIST_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', 'frontend', 'dist');
+const HAS_FRONTEND = existsSync(join(DIST_DIR, 'index.html'));
+
 export function createApp() {
   const app = express();
 
@@ -35,17 +44,22 @@ export function createApp() {
   mountSwagger(app);
   mountMcp(app);
 
-  // Friendly root: point operators at the docs and key endpoints.
-  app.get('/', (_req, res) => {
-    res.json({
-      service: 'financial-planning',
-      version: '1.0.0',
-      docs: '/docs',
-      health: '/api/v1/health',
-      mcp: '/mcp',
-      api: '/api/v1',
+  // Serve the built frontend's static assets (JS/CSS/etc.) if present.
+  if (HAS_FRONTEND) {
+    app.use(express.static(DIST_DIR));
+  } else {
+    // No frontend build: keep a friendly JSON landing page at the root.
+    app.get('/', (_req, res) => {
+      res.json({
+        service: 'financial-planning',
+        version: '1.0.0',
+        docs: '/docs',
+        health: '/api/v1/health',
+        mcp: '/mcp',
+        api: '/api/v1',
+      });
     });
-  });
+  }
 
   // --- REST API under /api/v1 ---
   const api = express.Router();
@@ -60,6 +74,15 @@ export function createApp() {
   app.use('/api/v1', (_req, res) => {
     res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Route not found' } });
   });
+
+  // SPA fallback: for any other GET that isn't an API/docs/mcp path, return the
+  // frontend's index.html so client-side routes (/clients/:id, /goals/:id) work
+  // on refresh/deep-link. Only active when a build is present.
+  if (HAS_FRONTEND) {
+    app.get(/^(?!\/(api|docs|mcp)(\/|$)).*/, (_req, res) => {
+      res.sendFile(join(DIST_DIR, 'index.html'));
+    });
+  }
 
   // Central error handler — renders ApiError (and unknown errors) as the
   // documented { error: { code, message, details } } body.
