@@ -53,6 +53,7 @@ npm test
 | Deterministic seed generator | `src/data/seed.js` |
 | MCP tool definitions + server | `src/mcp/` |
 | OpenAPI 3.0 spec + Swagger UI | `src/swagger.js` |
+| Exported OpenAPI 3.0 spec (for Anypoint Exchange) | `financial-planning-api.oas.json` |
 | Shared assumptions/constants | `src/config.js` |
 | Unit tests | `test/` |
 
@@ -150,6 +151,34 @@ missing resources return `404`.
 > Note how a goal can be ~90% funded on the deterministic projection yet show a
 > lower Monte Carlo probability of success — that's return volatility over a long
 > horizon, exactly the tension a planning conversation surfaces.
+
+### OpenAPI spec + Anypoint Exchange
+
+The spec is hand-authored in `src/swagger.js` and served live at `/docs.json`
+(and rendered by Swagger UI at `/docs`). A serialized copy is checked in as
+`financial-planning-api.oas.json` (OpenAPI **3.0.3**, all 17 paths) so the spec
+can be published to **Anypoint Exchange** without booting the app.
+
+Regenerate the exported file whenever the spec changes:
+
+```bash
+node --input-type=module -e "import {openApiSpec} from './src/swagger.js'; import {writeFileSync} from 'node:fs'; writeFileSync('financial-planning-api.oas.json', JSON.stringify(openApiSpec, null, 2));"
+```
+
+**Publish to Anypoint Exchange** as an `oas` asset (via the MuleSoft MCP
+tooling, or the [Anypoint CLI](https://docs.mulesoft.com/anypoint-cli/)):
+
+```bash
+anypoint-cli-v4 exchange:asset:upload \
+  --classifier oas \
+  --apiVersion v1 \
+  --mainFile financial-planning-api.oas.json \
+  "<groupId>/financial-planning-system-api/1.0.0"
+```
+
+Notes when publishing: the asset's `originalFormatVersion` is `3.0`
+(major.minor — not the full `3.0.3` patch string), the classifier is `oas`, and
+both a `groupId` (your org) and an explicit `assetId` are required.
 
 ---
 
