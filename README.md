@@ -4,7 +4,8 @@ Goals-based financial planning demo backend for a wealth advisor. Create client
 financial goals (retirement, education, home purchase, and more), project
 whether they are on track, run Monte Carlo simulations, aggregate net worth, and
 produce a plan summary an advisor could review with a client — all exposed as
-clean REST APIs **and** an MCP server for AI-agent access.
+clean REST APIs, an MCP server for AI-agent access, **and** a React advisor web
+UI for driving the whole thing in a live demo.
 
 Part of a Salesforce Financial Services Cloud (FSC) + MuleSoft demo estate. It
 fills the middle-office **planning** layer that sits alongside Portfolio
@@ -33,6 +34,23 @@ automatically. Then open:
 - **Health check:** http://localhost:3003/api/v1/health
 - **MCP server:** http://localhost:3003/mcp (health at `/mcp/health`)
 
+To also see the **advisor web UI** at http://localhost:3003, build the frontend
+once (the backend serves `frontend/dist` when it exists):
+
+```bash
+npm run build:frontend
+npm start
+```
+
+For **frontend development** with hot reload, run the Vite dev server alongside
+`npm start` — it serves the SPA on **:5173** and proxies `/api`, `/docs`, and
+`/mcp` to the backend on :3003:
+
+```bash
+npm start                      # backend on :3003 (terminal 1)
+npm --prefix frontend run dev  # UI on :5173 with HMR (terminal 2)
+```
+
 Run the unit tests (calculation engines + operations layer):
 
 ```bash
@@ -56,6 +74,7 @@ npm test
 | Exported OpenAPI 3.0 spec (for Anypoint Exchange) | `financial-planning-api.oas.json` |
 | Shared assumptions/constants | `src/config.js` |
 | Unit tests | `test/` |
+| React advisor web UI (Vite + Chart.js) | `frontend/` |
 
 The REST routes and MCP tools both call the **same** functions in
 `src/lib/operations.js`, so there is exactly one implementation of every
@@ -215,6 +234,40 @@ curl -s http://localhost:3003/mcp \
 
 ---
 
+## Web UI (advisor frontend)
+
+A single-page **React** app (Vite build, `react-router-dom` for routing,
+**Chart.js** via `react-chartjs-2` for the visuals) lives in `frontend/`. It's an
+advisor-facing console over the same REST API — no extra backend. `frontend/src/api.js`
+calls the API with **relative** URLs (`/api/v1/...`), so the SPA works both in
+dev (Vite proxies to :3003) and in production (Express serves it from the same
+origin).
+
+**Pages** (`frontend/src/pages/`):
+
+| Route | Page | Shows |
+|---|---|---|
+| `/` | Overview | Book-of-business rollup: client/goal/plan counts, total net worth, goal-status mix doughnut, clients needing attention |
+| `/clients` | Clients | Filterable client list (by risk tolerance) → click through to a dashboard |
+| `/clients/:clientId` | Client dashboard | The client's goals (with funded % + status), net worth breakdown, and plans |
+| `/goals` | Goals | Cross-client goal list, filterable by status / type / priority |
+| `/goals/:goalId` | Goal detail | Deterministic projection plus an interactive Monte Carlo (adjustable seed + iterations, "Re-run") with percentile chart |
+| `/plans` | Plans | Cross-client plan list with each plan's overall funded % + status |
+| `/plans/:planId` | Plan detail | Aggregate plan summary + blended Monte Carlo probability of success across the plan's goals |
+
+The top nav also links out to the **API docs** (`/docs`) and **MCP tools**
+(`/mcp/tools`), and has a **Reset demo data** button (`POST /api/v1/demo/reset`).
+
+**How it's served:** `npm run build:frontend` runs `vite build` into
+`frontend/dist`. On boot, `src/index.js` checks for `frontend/dist/index.html` —
+if present it serves the static assets and adds an SPA fallback so client-side
+routes (`/clients/:id`, `/goals/:id`) survive a refresh or deep-link. If the
+build is **absent**, the app still runs headless (API + docs + MCP) and serves a
+small JSON landing page at `/` instead. On Heroku the build runs automatically
+via the `heroku-postbuild` hook (see [Deployment](#deployment-heroku)).
+
+---
+
 ## Calculation logic
 
 All math lives in pure, unit-tested functions under `src/services/`.
@@ -287,9 +340,11 @@ demonstrative.
 ## Deployment (Heroku)
 
 Heroku-ready as a single web dyno: `Procfile` present, binds to `process.env.PORT`,
-`engines.node >= 18` set in `package.json`. No database add-on is required
-(in-memory store) — **do not** provision Postgres. No secrets or config are
-needed for the app to run.
+`engines.node >= 18` set in `package.json`. The React UI is built automatically
+during deploy by the `heroku-postbuild` hook (`npm run build:frontend`), so the
+one web dyno serves the API, docs, MCP server, **and** the advisor UI. No
+database add-on is required (in-memory store) — **do not** provision Postgres. No
+secrets or config are needed for the app to run.
 
 Replace the placeholders `<app-name>` and `<your-heroku-team>` with your own
 values.
@@ -314,6 +369,7 @@ heroku open --app <app-name>
 Verify the live deploy:
 
 - `GET https://<app-name>.herokuapp.com/api/v1/health` → `{ "status": "ok" }`
+- Advisor UI at `/` (the root)
 - Swagger UI at `/docs`
 - MCP server at `/mcp` (and `/mcp/health`)
 - `POST /api/v1/demo/reset` restores seed data
